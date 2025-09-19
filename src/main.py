@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from os import getenv
 import logging
 from datetime import datetime, timedelta, timezone
-logger = logging.getLogger(f"   {datetime.now}:")
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
