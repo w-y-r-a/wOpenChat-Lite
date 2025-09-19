@@ -11,9 +11,12 @@ load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print(f"\033[32mINFO\033[0m:     Starting wOpenChat Lite...")
+    """
+    basically startup scripts
+    """
+    print("\033[32mINFO\033[0m:     Starting wOpenChat Lite...")
     yield
-    print(f"\033[32mINFO\033[0m:     Stopping wOpenChat Lite...")
+    print("\033[32mINFO\033[0m:     Stopping wOpenChat Lite...")
 
 app = FastAPI(
     title="wOpenChat Lite",
@@ -23,6 +26,9 @@ app = FastAPI(
 
 @app.get("/")
 def root():
+    """
+    lit just the root
+    """
     return {
         "status": "healthy",
         "service": "wOpenChat",
@@ -30,4 +36,7 @@ def root():
         "version": app.version
     }
 
-uvicorn.run(app, host="0.0.0.0")
+uvicorn.run(
+    app, 
+    host="0.0.0.0"
+)
