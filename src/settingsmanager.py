@@ -11,3 +11,10 @@ def read_config(section: str, key: str):
         return config[section][key]   # section first, then key
     except KeyError:
         return "Config item Not Found"
+
+def write_config(section: str, key: str, new):
+    config[section][key] = new
+    with open(pathlib.Path(__file__).parent / 'config.ini', 'w') as configfile:
+        config.write(configfile)
+
+write_config("Global", "admin_password", "test")
