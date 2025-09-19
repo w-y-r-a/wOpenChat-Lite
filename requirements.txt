@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+asyncio
+motor
+pydantic
+pydantic[email]
+pyjwt
+aiohttp
+python-dotenv
+bcrypt
+configparser
