@@ -4,6 +4,7 @@ import uvicorn
 from dotenv import load_dotenv
 from os import getenv
 import logging
+import settingsmanager
 logger = logging.getLogger(__name__)
 
 load_dotenv()

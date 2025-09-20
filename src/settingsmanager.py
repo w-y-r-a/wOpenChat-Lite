@@ -17,4 +17,5 @@ def write_config(section: str, key: str, new):
     with open(pathlib.Path(__file__).parent / 'config.ini', 'w') as configfile:
         config.write(configfile)
 
-write_config("Global", "admin_password", "test")
+if __name__ != "__main__":
+    print("\033[32mINFO\033[0m:     Settings Manager Up!")
