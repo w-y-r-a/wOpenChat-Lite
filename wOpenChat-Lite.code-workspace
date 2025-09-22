@@ -4,5 +4,12 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.linting.pylintArgs": [
+			"--disable=missing-final-newline",
+			"--disable=trailing-whitespace",
+			"--disable=wrong-import-order",
+			"--disable=missing-module-docstring"
+		]
+	}
 }
