@@ -10,7 +10,7 @@ def read_config(section: str, key: str):
     try:
         return config[section][key]   # section first, then key
     except KeyError:
-        return "Config item Not Found"
+        return None
 
 def write_config(section: str, key: str, new):
     config[section][key] = new
@@ -18,4 +18,4 @@ def write_config(section: str, key: str, new):
         config.write(configfile)
 
 if __name__ != "__main__":
-    print("\033[32mINFO\033[0m:     Settings Manager Up!")
+    print(f"\033[32mINFO\033[0m:     Settings Manager Up! Path: {config_path}")

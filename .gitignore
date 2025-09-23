@@ -1,6 +1,6 @@
 .venv/*
 .idea/*
-src/config.ini
+*.ini
 .vscode/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
