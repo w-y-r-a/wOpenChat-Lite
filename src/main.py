@@ -1,10 +1,14 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import uvicorn
 from dotenv import load_dotenv
 from os import getenv
 import logging
 import settingsmanager
+from routers import router
+from api import router as apirouters
+import pathlib
 logger = logging.getLogger(__name__)
 
 load_dotenv()
@@ -24,17 +28,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-@app.get("/")
-def root():
-    """
-    lit just the root
-    """
-    return {
-        "status": "healthy",
-        "service": "wOpenChat",
-        "edition": "lite",
-        "version": app.version
-    }
+app.mount("/static", StaticFiles(directory=pathlib.Path(__file__).parent / "static"), name="static")
+
+app.include_router(router)
+app.include_router(apirouters, prefix="/api")
 
 uvicorn.run(
     app, 

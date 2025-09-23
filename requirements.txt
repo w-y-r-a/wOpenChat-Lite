@@ -9,3 +9,4 @@ aiohttp
 python-dotenv
 bcrypt
 configparser
+jinja2
