@@ -24,3 +24,12 @@ h1 {
     border-radius: 13px;
     padding: 10px;
 }
+
+a, a:link, a:visited {
+  color: #FFFAFA;
+  text-decoration: none;
+}
+
+a:hover {
+    color: aqua;
+}

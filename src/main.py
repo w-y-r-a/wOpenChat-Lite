@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 from fastapi.exception_handlers import http_exception_handler
 from contextlib import asynccontextmanager
@@ -8,7 +9,7 @@ import uvicorn
 from dotenv import load_dotenv
 from os import getenv
 import logging
-import settingsmanager
+from settingsmanager import read_config
 from routers import router
 from apis import api
 import pathlib
@@ -31,10 +32,21 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+THEME_COLOR = read_config("Customization", "theme_color")
+FAVICON_URL = read_config("Customization", "favicon_url")
+
+templates = Jinja2Templates(
+    directory=pathlib.Path(__file__).parent / "templates" / "errors"
+)
+
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request, exc):
     if exc.status_code == 404:
-        return JSONResponse({"error": "404NotFound", "error_description": "The requested resource was not found."}, 404)
+        return templates.TemplateResponse("404.html", {
+            "request": request,
+            "THEME_COLOR": THEME_COLOR,
+            "FAVICON_URL": FAVICON_URL
+        }, status_code=404)
     return await http_exception_handler(request, exc)
 
 app.mount("/static", StaticFiles(directory=pathlib.Path(__file__).parent / "static"), name="static")

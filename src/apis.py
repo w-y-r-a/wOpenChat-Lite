@@ -36,7 +36,7 @@ async def setup_info(
             {"error": "InvalidJSON", "error_description": "Request body must be valid JSON."},
             status_code=400,
         )
-
+        
     instance_name = payload.get("instance_name", "wOpenChat-Lite")
     mongo_url = payload.get("mongo_url")
 
