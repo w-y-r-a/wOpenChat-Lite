@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
         yield
         print("\033[32mINFO\033[0m:     Stopping wOpenChat Lite...")
     finally:
-        await close_db_connection()
+        close_db_connection()
         print("\033[32mINFO\033[0m:     Stopped wOpenChat Lite.")
 
 app = FastAPI(
