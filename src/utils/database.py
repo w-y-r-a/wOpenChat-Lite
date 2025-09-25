@@ -1,11 +1,14 @@
-from ..settingsmanager import read_config
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ConnectionFailure
+import os
+import sys
+sys.path.insert(1, os.getcwd())
+
+from src.settingsmanager import read_config
 
 db = None
 client = None
 
-MONGO_URL = read_config("Database", "MongoURL")
 
 async def init_db():
     """
@@ -16,6 +19,7 @@ async def init_db():
     Returns:
         bool: True if the connection is successful, otherwise raises an exception.
     """
+    MONGO_URL = read_config("Database", "MongoURL")
     global client, db
     try:
         client = AsyncIOMotorClient(
@@ -27,12 +31,12 @@ async def init_db():
         )
 
         await client.admin.command("ping")
-        print("Connected to MongoDB!")
+        print("\033[32mINFO\033[0m:     Connected to MongoDB!")
         db = client["wOpenChat"]
 
         return True
     except ConnectionFailure as e:
-        raise Exception(f"\033[92mINFO\033[0m:     Failed to connect to MongoDB: {str(e)}") from e
+        raise Exception(f"\033[31mERROR\033[0m:     Failed to connect to MongoDB: {str(e)}") from e
 
 async def get_collection(collection_name: str):
     global db
@@ -52,3 +56,25 @@ def close_db_connection():
     if client:
         client.close()
         client = None
+
+async def test_db_connection(URL) -> bool:
+    """
+    Tests the MongoDB connection by sending a ping command.
+
+    Returns:
+        bool: True if the connection is successful, False otherwise.
+    """
+    client = AsyncIOMotorClient(
+        URL,
+        maxPoolSize=50,
+        connectTimeoutMS=5000,
+        serverSelectionTimeoutMS=5000,
+        waitQueueTimeoutMS=5000,
+    )
+    try:
+        await client.admin.command("ping")
+        print("MongoDB connection test successful!")
+        return True
+    except ConnectionFailure as e:
+        print(f"MongoDB connection test failed: {str(e)}")
+        return False

@@ -1,21 +1,39 @@
 from configparser import ConfigParser
-import pathlib  
+import pathlib
+from typing import Optional
 
-config_path = pathlib.Path(__file__).parent / "config.ini"
+# Global configuration storage
+config = {}
 
-config = ConfigParser()
-config.read(config_path)
+def init_config() -> None:
+    """
+    Initialize the global config dict. Call this at startup before any read_config/write_config.
+    """
+    global config
+    # Load from disk/env/defaults as needed.
+    # Example placeholder: ensure required sections exist.
+    if not isinstance(config, dict):
+        config = {}
+    config.setdefault("Customization", {})
+    config.setdefault("Global", {})
+    config.setdefault("Database", {})
 
-def read_config(section: str, key: str):
+def read_config(section: str, key: str) -> Optional[str]:
+    """
+    Safe read from the global config. Returns None if not set or config not initialized.
+    """
     try:
-        return config[section][key]   # section first, then key
-    except KeyError:
+        return config[section][key]
+    except Exception:
         return None
 
-def write_config(section: str, key: str, new):
-    config[section][key] = new
-    with open(pathlib.Path(__file__).parent / 'config.ini', 'w') as configfile:
-        config.write(configfile)
-
-if __name__ != "__main__":
-    print(f"\033[32mINFO\033[0m:     Settings Manager Up! Path: {config_path}")
+def write_config(section: str, key: str, value: str) -> None:
+    """
+    Safe write into the global config.
+    """
+    global config
+    if not isinstance(config, dict):
+        config = {}
+    if section not in config or not isinstance(config[section], dict):
+        config[section] = {}
+    config[section][key] = value
