@@ -26,7 +26,7 @@ async def setup_info(
         request: Request,
         response: Response,
 ):
-    if read_config("Global", "setup_complete") == "true":
+    if read_config("Global", "setup_complete", cast=lambda v: v.lower() == "true"):
         return JSONResponse(
             {"error": "SetupAlreadyCompleted", "error_description": "The setup has already been completed."},
             status_code=400,

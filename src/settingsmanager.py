@@ -1,39 +1,57 @@
 from configparser import ConfigParser
+from typing import Any, Optional, Callable
 import pathlib
-from typing import Optional
+CONFIG_PATH = pathlib.Path(__file__).parent / "config.ini"
+config = ConfigParser()
+config.read(CONFIG_PATH)
 
-# Global configuration storage
-config = {}
+def _ensure_loaded() -> None:
+    # Read once; ConfigParser.read is idempotent and cheap
+    if not getattr(_ensure_loaded, "_loaded", False):
+        config.read(CONFIG_PATH)
+        setattr(_ensure_loaded, "_loaded", True)
 
 def init_config() -> None:
     """
-    Initialize the global config dict. Call this at startup before any read_config/write_config.
+    Ensure config is loaded and required sections exist.
+    Call this during startup before DB init.
     """
-    global config
-    # Load from disk/env/defaults as needed.
-    # Example placeholder: ensure required sections exist.
-    if not isinstance(config, dict):
-        config = {}
-    config.setdefault("Customization", {})
-    config.setdefault("Global", {})
-    config.setdefault("Database", {})
+    _ensure_loaded()
+    # Ensure sections exist
+    for section in ("Customization", "Global", "Database"):
+        if not config.has_section(section):
+            config.add_section(section)
+    # Optionally set safe defaults
+    if not config.has_option("Global", "setup_complete"):
+        config.set("Global", "setup_complete", "false")
 
-def read_config(section: str, key: str) -> Optional[str]:
-    """
-    Safe read from the global config. Returns None if not set or config not initialized.
-    """
+def _convert(value: str, caster: Optional[Callable[[str], Any]]) -> Any:
+    if caster is None:
+        return value
     try:
-        return config[section][key]
+        return caster(value)
     except Exception:
         return None
 
-def write_config(section: str, key: str, value: str) -> None:
+def read_config(section: str, key: str, *, cast: Optional[Callable[[str], Any]] = None) -> Optional[Any]:
     """
-    Safe write into the global config.
+    Returns None if section/key missing. Optionally cast the string value.
     """
-    global config
-    if not isinstance(config, dict):
-        config = {}
-    if section not in config or not isinstance(config[section], dict):
-        config[section] = {}
-    config[section][key] = value
+    _ensure_loaded()
+    if config.has_option(section, key):
+        return _convert(config.get(section, key), cast)
+    return None
+
+def write_config(section: str, key: str, new: Any) -> None:
+    """
+    Writes value as string and persists to disk. Ensures section exists.
+    """
+    _ensure_loaded()
+    if not config.has_section(section):
+        config.add_section(section)
+    config.set(section, key, str(new))
+    with open(CONFIG_PATH, "w") as configfile:
+        config.write(configfile)
+
+if __name__ != "__main__":
+    print(f"\033[32mINFO\033[0m:     Settings Manager Up! Path: {CONFIG_PATH}")
