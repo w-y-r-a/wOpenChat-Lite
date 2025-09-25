@@ -16,13 +16,14 @@ router = APIRouter(tags=["app"])
 
 @router.get("/")
 def root(request: Request):
-    if read_config("Global", "setup_complete") is None:
+    print(read_config("Global", "setup_complete"))
+    if read_config("Global", "setup_complete") == "false":
         return templates.TemplateResponse("setup.html", {
             "request": request,
             "THEME_COLOR": THEME_COLOR,
             "FAVICON_URL": FAVICON_URL
         })
-    elif read_config("Global", "setup_complete"):
+    elif read_config("Global", "setup_complete") == "true":
         return templates.TemplateResponse("index.html", {
             "request": request,
             "THEME_COLOR": THEME_COLOR,
