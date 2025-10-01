@@ -5,11 +5,11 @@ from settingsmanager import read_config
 import pathlib
 
 try:
-    THEME_COLOR = read_config().get("customization").get("theme_color")
+    THEME_COLOR = read_config().get("customization").get("theme_color") # pyright: ignore[reportOptionalMemberAccess]
 except AttributeError:
     THEME_COLOR = None
 try:
-    FAVICON_URL = read_config().get("customization").get("favicon_url")
+    FAVICON_URL = read_config().get("customization").get("favicon_url") # pyright: ignore[reportOptionalMemberAccess]
 except:
     FAVICON_URL = None
 try:
@@ -26,22 +26,18 @@ router = APIRouter(tags=["app"])
 @router.get("/")
 def root(request: Request):
     if setup_complete == False:
-        print(1)
-        print(setup_complete)
         return templates.TemplateResponse("setup.html", {
             "request": request,
             "THEME_COLOR": THEME_COLOR,
             "FAVICON_URL": FAVICON_URL
         })
     elif setup_complete == True:
-        print(2)
         return templates.TemplateResponse("index.html", {
             "request": request,
             "THEME_COLOR": THEME_COLOR,
             "FAVICON_URL": FAVICON_URL
         })
     else:
-        print(3)
         return templates.TemplateResponse("setup.html", {
             "request": request,
             "THEME_COLOR": THEME_COLOR,

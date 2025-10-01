@@ -26,13 +26,13 @@ async def lifespan(app: FastAPI):
     await ensure_config()
     global THEME_COLOR, FAVICON_URL
     try:
-        THEME_COLOR = read_config().get("customization").get("theme_color")
+        THEME_COLOR = read_config().get("customization").get("theme_color") # pyright: ignore[reportOptionalMemberAccess]
     except AttributeError:
         THEME_COLOR = None
     try:
-        FAVICON_URL = read_config().get("customization").get("favicon_url")
+        FAVICON_URL = read_config().get("customization").get("favicon_url") # pyright: ignore[reportOptionalMemberAccess]
     except:
-    FAVICON_URL = None
+        FAVICON_URL = None
     await init_db()
     from routers import router
     from apis import api

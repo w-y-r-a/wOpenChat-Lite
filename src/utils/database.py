@@ -19,7 +19,7 @@ async def init_db():
         bool: True if the connection is successful, otherwise raises an exception.
     """
     try:
-        setup_complete = settingsmanager.read_config().get("global").get("setup_complete")
+        setup_complete = settingsmanager.read_config().get("global").get("setup_complete")  # pyright: ignore[reportOptionalMemberAccess]
     except AttributeError:
         setup_complete = False
     if setup_complete:
@@ -54,7 +54,7 @@ async def get_collection(collection_name: str):
     global db
     if db is None:
         await init_db()
-    return db[collection_name]
+    return db[collection_name] # pyright: ignore[reportOptionalSubscript]
 
 # Doesn't need to be async since it's just closing the connection
 def close_db_connection():

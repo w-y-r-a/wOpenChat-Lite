@@ -54,6 +54,8 @@ async def setup_info(
 
     instance_name = payload.get("instance_name", "wOpenChat-Lite")
     mongo_url = payload.get("mongo_url")
+    favicon_url = payload.get("favicon_url")
+    theme_color = payload.get("theme_color")
 
     if not mongo_url or not isinstance(mongo_url, str) or not mongo_url.strip():
         return JSONResponse(
@@ -78,6 +80,10 @@ async def setup_info(
         "global": {
             "setup_complete": True,
             "instance_name": instance_name,
+        },
+        "customization": {
+            "favicon_url": favicon_url,
+            "theme_color": theme_color
         },
         "mongo_url": mongo_url.strip()
     })
