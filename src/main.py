@@ -10,7 +10,7 @@ import uvicorn
 from dotenv import load_dotenv
 from os import getenv
 import logging
-from settingsmanager import read_config, init_config
+from settingsmanager import read_config, ensure_config, write_config
 from utils.database import init_db, close_db_connection
 import pathlib
 logger = logging.getLogger(__name__)
@@ -23,15 +23,19 @@ async def lifespan(app: FastAPI):
     basically startup scripts
     """
     print("\033[32mINFO\033[0m:     Starting wOpenChat Lite...")
-    init_config()
+    await ensure_config()
     global THEME_COLOR, FAVICON_URL
-    THEME_COLOR = read_config("Customization", "theme_color")
-    FAVICON_URL = read_config("Customization", "favicon_url")
+    try:
+        THEME_COLOR = read_config().get("customization").get("theme_color")
+        FAVICON_URL = read_config().get("customization").get("favicon_url")
+    except AttributeError:
+        THEME_COLOR = None
+        FAVICON_URL = None
     await init_db()
     from routers import router
-    from apis import api
+    #from apis import api
     app.include_router(router)
-    app.include_router(api, prefix="/api")
+    #app.include_router(api, prefix="/api")
     try:
         yield
         print("\033[32mINFO\033[0m:     Stopping wOpenChat Lite...")
@@ -58,6 +62,10 @@ async def custom_http_exception_handler(request, exc):
             "FAVICON_URL": FAVICON_URL
         }, status_code=404)
     return await http_exception_handler(request, exc)
+
+@app.exception_handler(AttributeError)
+def handle_attribute_error():
+    return None
 
 app.mount("/static", StaticFiles(directory=pathlib.Path(__file__).parent / "static"), name="static")
 

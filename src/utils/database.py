@@ -3,8 +3,7 @@ from pymongo.errors import ConnectionFailure
 import os
 import sys
 sys.path.insert(1, os.getcwd())
-
-from src.settingsmanager import read_config
+import src.settingsmanager as settingsmanager
 
 db = None
 client = None
@@ -19,24 +18,37 @@ async def init_db():
     Returns:
         bool: True if the connection is successful, otherwise raises an exception.
     """
-    MONGO_URL = read_config("Database", "MongoURL")
-    global client, db
     try:
-        client = AsyncIOMotorClient(
-            MONGO_URL,
-            maxPoolSize=50,
-            connectTimeoutMS=5000,
-            serverSelectionTimeoutMS=5000,
-            waitQueueTimeoutMS=5000,
-        )
+        setup_complete = settingsmanager.read_config().get("global").get("setup_complete")
+    except AttributeError:
+        setup_complete = False
+    if setup_complete:
+        print("\033[32mINFO\033[0m:     Setup Complete!")
+    if not setup_complete:
+        print("\033[32mINFO\033[0m:     Setup not complete!")
+        return False
+    elif not setup_complete:
+        return False
+    else:
+        print()
+        MONGO_URL = settingsmanager.read_config().get("mongo_url")
+        global client, db
+        try:
+            client = AsyncIOMotorClient(
+                MONGO_URL,
+                maxPoolSize=50,
+                connectTimeoutMS=5000,
+                serverSelectionTimeoutMS=5000,
+                waitQueueTimeoutMS=5000,
+            )
 
-        await client.admin.command("ping")
-        print("\033[32mINFO\033[0m:     Connected to MongoDB!")
-        db = client["wOpenChat"]
+            await client.admin.command("ping")
+            print("\033[32mINFO\033[0m:     Connected to MongoDB!")
+            db = client["wOpenChat"]
 
-        return True
-    except ConnectionFailure as e:
-        raise Exception(f"\033[31mERROR\033[0m:     Failed to connect to MongoDB: {str(e)}") from e
+            return True
+        except ConnectionFailure as e:
+            raise Exception(f"\033[31mERROR\033[0m:     Failed to connect to MongoDB: {str(e)}") from e
 
 async def get_collection(collection_name: str):
     global db
@@ -73,8 +85,8 @@ async def test_db_connection(URL) -> bool:
     )
     try:
         await client.admin.command("ping")
-        print("MongoDB connection test successful!")
+        print("\033[32mINFO\033[0m:     MongoDB connection test successful!")
         return True
     except ConnectionFailure as e:
-        print(f"MongoDB connection test failed: {str(e)}")
+        print(f"\033[31mERROR\033[0m:     MongoDB connection test failed: {str(e)}")
         return False

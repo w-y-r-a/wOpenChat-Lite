@@ -1,57 +1,58 @@
-from configparser import ConfigParser
+# TODO: Change to JSON
+# Make async since its accessing IO(disk)
+import json
 from typing import Any, Optional, Callable
 import pathlib
-CONFIG_PATH = pathlib.Path(__file__).parent / "config.ini"
-config = ConfigParser()
-config.read(CONFIG_PATH)
+import os
+CONFIG_PATH = pathlib.Path(__file__).parent / "config.json"
 
-def _ensure_loaded() -> None:
-    # Read once; ConfigParser.read is idempotent and cheap
-    if not getattr(_ensure_loaded, "_loaded", False):
-        config.read(CONFIG_PATH)
-        setattr(_ensure_loaded, "_loaded", True)
-
-def init_config() -> None:
-    """
-    Ensure config is loaded and required sections exist.
-    Call this during startup before DB init.
-    """
-    _ensure_loaded()
-    # Ensure sections exist
-    for section in ("Customization", "Global", "Database"):
-        if not config.has_section(section):
-            config.add_section(section)
-    # Optionally set safe defaults
-    if not config.has_option("Global", "setup_complete"):
-        config.set("Global", "setup_complete", "false")
-
-def _convert(value: str, caster: Optional[Callable[[str], Any]]) -> Any:
-    if caster is None:
-        return value
+async def ensure_config():
     try:
-        return caster(value)
-    except Exception:
-        return None
+        with open(CONFIG_PATH, "r"):
+            print(f"\033[32mINFO\033[0m:     Settings Manager Up! Path: {CONFIG_PATH}")
+    except FileNotFoundError:
+        print("\033[32mWARN\033[0m:     Settings file not found! Creating...")
+        with open(CONFIG_PATH, "x"):
+            print(f"\033[1;33mINFO\033[0m:     File created! Path: {CONFIG_PATH}")
 
-def read_config(section: str, key: str, *, cast: Optional[Callable[[str], Any]] = None) -> Optional[Any]:
+def read_config():
     """
-    Returns None if section/key missing. Optionally cast the string value.
+    Reads and parses a JSON configuration file.
+    Returns an empty dictionary if the file is not found or is empty.
     """
-    _ensure_loaded()
-    if config.has_option(section, key):
-        return _convert(config.get(section, key), cast)
-    return None
+    try:
+        if os.path.exists(CONFIG_PATH) and os.path.getsize(CONFIG_PATH) > 0:
+            with open(CONFIG_PATH, "r") as f:
+                return json.load(f)
+        else:
+            return {}  # Return an empty dict if the file is empty or doesn't exist
+    except json.JSONDecodeError:
+        print("\033[31mError\033[0m:     Invalid JSON format in config file.")
+        return {}
 
-def write_config(section: str, key: str, new: Any) -> None:
-    """
-    Writes value as string and persists to disk. Ensures section exists.
-    """
-    _ensure_loaded()
-    if not config.has_section(section):
-        config.add_section(section)
-    config.set(section, key, str(new))
-    with open(CONFIG_PATH, "w") as configfile:
-        config.write(configfile)
 
-if __name__ != "__main__":
-    print(f"\033[32mINFO\033[0m:     Settings Manager Up! Path: {CONFIG_PATH}")
+def write_config(content: dict) -> bool:
+    """
+    Reads a JSON config file, updates it with new content, and writes it back.
+    """
+    try:
+        # Open the file for reading and load the data.
+        # Handles empty file by starting with an empty dict.
+        if os.path.exists(CONFIG_PATH) and os.path.getsize(CONFIG_PATH) > 0:
+            with open(CONFIG_PATH, "r") as f:
+                data = json.load(f)
+        else:
+            data = {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        # If file doesn't exist or is invalid JSON, start with a fresh dict.
+        data = {}
+
+    # Update the dictionary with the new content.
+    data.update(content)
+
+    # Open the file in write mode ('w') to overwrite it with the updated data.
+    with open(CONFIG_PATH, "w") as f:
+        # Use json.dump() to write the Python object to the file.
+        json.dump(data, f, indent=4)
+        
+    return True
