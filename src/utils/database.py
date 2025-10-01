@@ -3,7 +3,7 @@ from pymongo.errors import ConnectionFailure
 import os
 import sys
 sys.path.insert(1, os.getcwd())
-import src.settingsmanager as settingsmanager
+import src.settingsmanager as settingsmanager # pylint: disable=import-error
 
 db = None
 client = None

@@ -27,15 +27,17 @@ async def lifespan(app: FastAPI):
     global THEME_COLOR, FAVICON_URL
     try:
         THEME_COLOR = read_config().get("customization").get("theme_color")
-        FAVICON_URL = read_config().get("customization").get("favicon_url")
     except AttributeError:
         THEME_COLOR = None
-        FAVICON_URL = None
+    try:
+        FAVICON_URL = read_config().get("customization").get("favicon_url")
+    except:
+    FAVICON_URL = None
     await init_db()
     from routers import router
-    #from apis import api
+    from apis import api
     app.include_router(router)
-    #app.include_router(api, prefix="/api")
+    app.include_router(api, prefix="/api")
     try:
         yield
         print("\033[32mINFO\033[0m:     Stopping wOpenChat Lite...")

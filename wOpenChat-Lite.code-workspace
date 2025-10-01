@@ -10,6 +10,8 @@
 			"--disable=trailing-whitespace",
 			"--disable=wrong-import-order",
 			"--disable=missing-module-docstring"
-		]
+		],
+		"python.languageServer": "Default",
+		"python.pythonPath": ".venv/bin/python3"
 	}
 }

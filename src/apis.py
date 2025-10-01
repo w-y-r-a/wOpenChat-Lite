@@ -1,5 +1,4 @@
 import re
-
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
@@ -8,6 +7,12 @@ from settingsmanager import read_config, write_config
 from utils.database import test_db_connection
 
 load_dotenv()
+
+# Configs from settingsmanager
+try:
+    setup_complete = read_config().get("global").get("setup_complete") # pyright: ignore[reportOptionalMemberAccess]
+except AttributeError:
+    setup_complete = False
 
 api = APIRouter(tags=["api"])
 
@@ -26,7 +31,7 @@ async def setup_info(
         request: Request,
         response: Response,
 ):
-    if read_config("Global", "setup_complete", cast=lambda v: v.lower() == "true"):
+    if setup_complete:
         return JSONResponse(
             {"error": "SetupAlreadyCompleted", "error_description": "The setup has already been completed."},
             status_code=400,
@@ -53,13 +58,13 @@ async def setup_info(
     if not mongo_url or not isinstance(mongo_url, str) or not mongo_url.strip():
         return JSONResponse(
             {"error": "MissingField", "error_description": "Field 'mongo_url' is required."},
-            status_code=400,
+            status_code=422,
         )
 
     if not re.match(r'^mongodb(\+srv)?://.*', mongo_url):
         return JSONResponse(
             {"error": "InvalidMongoURL", "error_description": "The provided MongoDB URL is not valid."},
-            status_code=400,
+            status_code=422,
         )
 
     if await test_db_connection(mongo_url) is False:
@@ -69,9 +74,13 @@ async def setup_info(
             status_code=400,
         )
 
-    write_config("Global", "setup_complete", "true")
-    write_config("Global", "instance_name", instance_name)
-    write_config("Database", "MongoURL", mongo_url.strip())
+    write_config({
+        "global": {
+            "setup_complete": True,
+            "instance_name": instance_name,
+        },
+        "mongo_url": mongo_url.strip()
+    })
 
     return JSONResponse({
         "success": True

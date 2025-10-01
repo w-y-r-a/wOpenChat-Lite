@@ -1,7 +1,5 @@
-# TODO: Change to JSON
 # Make async since its accessing IO(disk)
 import json
-from typing import Any, Optional, Callable
 import pathlib
 import os
 CONFIG_PATH = pathlib.Path(__file__).parent / "config.json"
@@ -11,9 +9,9 @@ async def ensure_config():
         with open(CONFIG_PATH, "r"):
             print(f"\033[32mINFO\033[0m:     Settings Manager Up! Path: {CONFIG_PATH}")
     except FileNotFoundError:
-        print("\033[32mWARN\033[0m:     Settings file not found! Creating...")
+        print("\033[33mWARN\033[0m:     Settings file not found! Creating...")
         with open(CONFIG_PATH, "x"):
-            print(f"\033[1;33mINFO\033[0m:     File created! Path: {CONFIG_PATH}")
+            print(f"\033[32mINFO\033[0m:     File created! Path: {CONFIG_PATH}")
 
 def read_config():
     """
@@ -27,7 +25,7 @@ def read_config():
         else:
             return {}  # Return an empty dict if the file is empty or doesn't exist
     except json.JSONDecodeError:
-        print("\033[31mError\033[0m:     Invalid JSON format in config file.")
+        print("\033[31mERROR\033[0m:     Invalid JSON format in config file.")
         return {}
 
 
@@ -50,9 +48,7 @@ def write_config(content: dict) -> bool:
     # Update the dictionary with the new content.
     data.update(content)
 
-    # Open the file in write mode ('w') to overwrite it with the updated data.
     with open(CONFIG_PATH, "w") as f:
-        # Use json.dump() to write the Python object to the file.
         json.dump(data, f, indent=4)
         
     return True
