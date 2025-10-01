@@ -18,7 +18,7 @@ h1 {
 
 .pamphlet {
     margin: 0 auto;
-    width: fit-content;
+    width: 80%;
     border: 1px solid #343434;
     background-color: #1f1f1f;
     border-radius: 13px;
