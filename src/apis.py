@@ -1,10 +1,14 @@
+import asyncio
+import os
 import re
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from os import getenv
 from settingsmanager import read_config, write_config
-from utils.database import test_db_connection
+from utils.database import test_db_connection, init_db, close_db_connection, get_collection
+from utils.create_user_json import create_user_json
+from utils.restart import restart_app
 
 load_dotenv()
 
@@ -54,8 +58,8 @@ async def setup_info(
 
     instance_name = payload.get("instance_name", "wOpenChat-Lite")
     mongo_url = payload.get("mongo_url")
-    favicon_url = payload.get("favicon_url")
-    theme_color = payload.get("theme_color")
+    favicon_url = payload.get("favicon_url", "/static/img/favicon.ico")
+    theme_color = payload.get("theme_color", "#0925C2")
 
     if not mongo_url or not isinstance(mongo_url, str) or not mongo_url.strip():
         return JSONResponse(
@@ -76,6 +80,8 @@ async def setup_info(
             status_code=400,
         )
 
+    await init_db() # Temporarily initialize DB for admin user creation
+
     write_config({
         "global": {
             "setup_complete": True,
@@ -88,6 +94,54 @@ async def setup_info(
         "mongo_url": mongo_url.strip()
     })
 
+    # Then now admin users will be created
+    admin_username = payload.get("admin_username")
+    if not admin_username or not isinstance(admin_username, str) or not admin_username.strip():
+        return JSONResponse(
+            {"error": "MissingField", "error_description": "Field 'admin_username' is required."},
+            status_code=422,
+        )
+    admin_email = payload.get("admin_email")
+    if not admin_email or not isinstance(admin_email, str) or not admin_email.strip():
+        return JSONResponse(
+            {"error": "MissingField", "error_description": "Field 'admin_email' is required."},
+            status_code=422,
+        )
+    if not re.match(r'^[^@]+@[^@]+\.[^@]+$', admin_email):
+        return JSONResponse(
+            {"error": "InvalidEmail", "error_description": "The provided admin email is not valid."},
+            status_code=422,
+        )
+    admin_password = payload.get("admin_password")
+    if not admin_password or not isinstance(admin_password, str) or not admin_password.strip():
+        return JSONResponse(
+            {"error": "MissingField", "error_description": "Field 'admin_password' is required."},
+            status_code=422,
+        )
+    if len(admin_password) < 8:
+        return JSONResponse(
+            {"error": "WeakPassword", "error_description": "Admin password must be at least 8 characters long."},
+            status_code=400,
+        )
+
+    # now to actually create the admin user
+    users = await get_collection("users")
+
+    await users.insert_one(
+        create_user_json(
+            username=admin_username.strip(),
+            email=admin_email.strip(),
+            password=admin_password.strip(),
+            admin=True,
+            enabled=True
+        )
+    )
+
+    close_db_connection()
+
+    task = asyncio.create_task(restart_app())
+
     return JSONResponse({
-        "success": True
+        "success": True,
+        "message": "Setup complete, restarting wOpenChat-Lite to apply changes."
     })

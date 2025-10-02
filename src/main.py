@@ -12,6 +12,7 @@ from os import getenv
 import logging
 from settingsmanager import read_config, ensure_config, write_config
 from utils.database import init_db, close_db_connection
+from utils.ensure_indexes import ensure_indexes
 import pathlib
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ async def lifespan(app: FastAPI):
     except:
         FAVICON_URL = None
     await init_db()
+    await ensure_indexes()
     from routers import router
     from apis import api
     app.include_router(router)

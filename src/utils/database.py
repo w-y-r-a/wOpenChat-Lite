@@ -66,7 +66,9 @@ def close_db_connection():
     """
     global client
     if client:
+        print("\033[32mINFO\033[0m:     Closing MongoDB connection...")
         client.close()
+        print("\033[32mINFO\033[0m:     MongoDB connection closed.")
         client = None
 
 async def test_db_connection(URL) -> bool:
