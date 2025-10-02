@@ -56,18 +56,43 @@
             <input type="email" placeholder="admin@example.com" id="admin_email" name="admin_email" required><br>
             <label for="admin_password">Admin Password <span class="required">*</span></label><br>
             <input type="password" placeholder="YourStrongPassword123!" id="admin_password" name="admin_password" required><br>
-            <button type="button" onclick="submitSetup()">Submit</button>
+            <input type="submit" onclick="submitSetup()" value="Submit Setup">
             <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
             <script>
                 function submitSetup() {
+                    // validation
+                    if (!document.getElementById("mongo_url").value) {
+                        const mongo_url = document.getElementById("mongo_url");
+                        mongo_url.style.border = "1px solid red";
+                    }
+                    else if (!/^mongodb(\+srv)?:\/\/.*/.test(document.getElementById("mongo_url").value)) {
+                        alert("Please enter a valid MongoDB connection URL. (It should start with 'mongodb://' or 'mongodb+srv://')");
+                        const mongo_url = document.getElementById("mongo_url");
+                        mongo_url.style.border = "1px solid red";
+                    }
+                    else if (!document.getElementById("admin_username").value) {
+                        const admin_username = document.getElementById("admin_username");
+                        admin_username.style.border = "1px solid red";
+                    }
+                    else if (!document.getElementById("admin_email").value) {
+                        const admin_email = document.getElementById("admin_email");
+                        admin_email.style.border = "1px solid red";
+                    }
+                    else if (!document.getElementById("admin_password").value) {
+                        const admin_password = document.getElementById("admin_password");
+                        admin_password.style.border = "1px solid red";
+                    }
+
+                    // general
+
                     let instance_name = document.getElementById("instancename").value;
                     let favicon_url = document.getElementById("favicon_url").value;
                     let theme_color = document.getElementById("theme_color").value;
-                    let mongo_url = btoa(document.getElementById("mongo_url").value);
+                    let mongo_url = btoa(document.getElementById("mongo_url").value); // Sensitive data(Connection URL may contain username/password)
                     // admin
                     let admin_username = document.getElementById("admin_username").value;
                     let admin_email = document.getElementById("admin_email").value;
-                    let admin_password = btoa(document.getElementById("admin_password").value); // MAKE SURE TO BASE64 ENCODE IT
+                    let admin_password = btoa(document.getElementById("admin_password").value); // Sensitive data
                     let json_req = {
                         "instance_name": instance_name,
                         "favicon_url": favicon_url,
@@ -78,11 +103,13 @@
                         "admin_email": admin_email
                     };
 
-                    axios({
+                    const request = axios.create({
                         method: 'post',
                         url: '/api/setup-info',
                         data: json_req
                         });
+                    
+                    // handle the request
                 }
             </script>
         </form>
