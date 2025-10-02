@@ -1,5 +1,6 @@
 import asyncio
 import os
+import base64
 import re
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
@@ -57,7 +58,9 @@ async def setup_info(
         )
 
     instance_name = payload.get("instance_name", "wOpenChat-Lite")
-    mongo_url = payload.get("mongo_url")
+    decoded_bytes = base64.b64decode(payload.get("mongo_url"))
+    # Convert bytes to a string (assuming UTF-8 encoding)
+    mongo_url = decoded_bytes.decode('utf-8')
     favicon_url = payload.get("favicon_url", "/static/img/favicon.ico")
     theme_color = payload.get("theme_color", "#0925C2")
 

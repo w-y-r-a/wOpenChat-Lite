@@ -46,7 +46,7 @@
             <label for="theme_color">Theme Color</label><br>
             <input type="color" value="#0925C2" id="theme_color" name="theme_color"><br>
             <label for="mongo_url">MongoDB Connection URL <span class="required">*</span></label><br>
-            <input type="url" placeholder="mongodb://localhost:27017" id="mongo_url" name="mongo_url" required><br>
+            <input type="text" placeholder="mongodb://localhost:27017" id="mongo_url" name="mongo_url" required><br>
 
             <h2>Admin Setup</h2>
             <hr>
@@ -56,6 +56,35 @@
             <input type="email" placeholder="admin@example.com" id="admin_email" name="admin_email" required><br>
             <label for="admin_password">Admin Password <span class="required">*</span></label><br>
             <input type="password" placeholder="YourStrongPassword123!" id="admin_password" name="admin_password" required><br>
+            <button type="button" onclick="submitSetup()">Submit</button>
+            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+            <script>
+                function submitSetup() {
+                    let instance_name = document.getElementById("instancename").value;
+                    let favicon_url = document.getElementById("favicon_url").value;
+                    let theme_color = document.getElementById("theme_color").value;
+                    let mongo_url = btoa(document.getElementById("mongo_url").value);
+                    // admin
+                    let admin_username = document.getElementById("admin_username").value;
+                    let admin_email = document.getElementById("admin_email").value;
+                    let admin_password = btoa(document.getElementById("admin_password").value); // MAKE SURE TO BASE64 ENCODE IT
+                    let json_req = {
+                        "instance_name": instance_name,
+                        "favicon_url": favicon_url,
+                        "mongo_url": mongo_url,
+                        "theme_color": theme_color,
+                        "admin_username": admin_username,
+                        "admin_password": admin_password,
+                        "admin_email": admin_email
+                    };
+
+                    axios({
+                        method: 'post',
+                        url: '/api/setup-info',
+                        data: json_req
+                        });
+                }
+            </script>
         </form>
     </div>
 </body>
