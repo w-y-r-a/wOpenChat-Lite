@@ -36,7 +36,7 @@
     <script>
     </script>
     <div class="pamphlet">
-        <form>
+        <form onsubmit="submitSetup(event); return false;">
             <h2>General</h2>
             <hr>
             <label for="instancename">Instance Name</label><br>
@@ -56,31 +56,45 @@
             <input type="email" placeholder="admin@example.com" id="admin_email" name="admin_email" required><br>
             <label for="admin_password">Admin Password <span class="required">*</span></label><br>
             <input type="password" placeholder="YourStrongPassword123!" id="admin_password" name="admin_password" required><br>
-            <input type="submit" onclick="submitSetup()" value="Submit Setup">
+            <input type="submit" value="Submit Setup">
             <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
             <script>
-                function submitSetup() {
+                function submitSetup(event) {
+                    // Prevent form submission
+                    event.preventDefault();
+
                     // validation
                     if (!document.getElementById("mongo_url").value) {
                         const mongo_url = document.getElementById("mongo_url");
                         mongo_url.style.border = "1px solid red";
+                        return;
                     }
                     else if (!/^mongodb(\+srv)?:\/\/.*/.test(document.getElementById("mongo_url").value)) {
                         alert("Please enter a valid MongoDB connection URL. (It should start with 'mongodb://' or 'mongodb+srv://')");
                         const mongo_url = document.getElementById("mongo_url");
                         mongo_url.style.border = "1px solid red";
+                        return;
                     }
                     else if (!document.getElementById("admin_username").value) {
                         const admin_username = document.getElementById("admin_username");
                         admin_username.style.border = "1px solid red";
+                        return;
                     }
                     else if (!document.getElementById("admin_email").value) {
                         const admin_email = document.getElementById("admin_email");
                         admin_email.style.border = "1px solid red";
+                        return;
+                    }
+                    else if (!/^[^@]+@[^@]+\.[^@]+$/.test(document.getElementById("admin_email").value)) {
+                        alert("Please enter a valid email address.");
+                        const admin_email = document.getElementById("admin_email");
+                        admin_email.style.border = "1px solid red";
+                        return;
                     }
                     else if (!document.getElementById("admin_password").value) {
                         const admin_password = document.getElementById("admin_password");
                         admin_password.style.border = "1px solid red";
+                        return;
                     }
 
                     // general
@@ -104,12 +118,25 @@
                     };
 
                     const request = axios.create({
-                        method: 'post',
-                        url: '/api/setup-info',
-                        data: json_req
+                        baseURL: '/api',
                         });
-                    
+
                     // handle the request
+                    request({
+                        method: 'post',
+                        url: '/setup-info',
+                        data: json_req
+                    }).then((response) => {
+                        if (response.data.status === "success") {
+                            alert("Setup completed successfully! Restarting wOpenChat-Lite...");
+                        }
+                        else {
+                            alert("Error: " + response.data.message);
+                        }
+                    }).catch((error) => {
+                        alert("An error occurred while submitting the setup information. Please try again.");
+                        console.error(error);
+                    });
                 }
             </script>
         </form>
