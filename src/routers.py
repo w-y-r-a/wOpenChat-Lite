@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from settingsmanager import read_config
 import pathlib
+from service import root_handler
 
 try:
     THEME_COLOR = read_config().get("customization").get("theme_color") # pyright: ignore[reportOptionalMemberAccess]
@@ -24,7 +25,7 @@ templates = Jinja2Templates(
 router = APIRouter(tags=["app"])
 
 @router.get("/")
-def root(request: Request):
+async def root(request: Request, response: Response):
     if setup_complete == False:
         return templates.TemplateResponse("setup.html", {
             "request": request,
@@ -32,14 +33,13 @@ def root(request: Request):
             "FAVICON_URL": FAVICON_URL
         })
     elif setup_complete == True:
-        return templates.TemplateResponse("index.html", {
-            "request": request,
-            "THEME_COLOR": THEME_COLOR,
-            "FAVICON_URL": FAVICON_URL
-        })
+        return await root_handler.root_handler(request, response)
     else:
         return templates.TemplateResponse("setup.html", {
             "request": request,
             "THEME_COLOR": THEME_COLOR,
             "FAVICON_URL": FAVICON_URL
         })
+
+# @router.get("/login")
+# Make it return a template called login.html, and the actual backend will be an API from login.py

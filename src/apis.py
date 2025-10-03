@@ -1,6 +1,6 @@
 import asyncio
-import os
 import base64
+from datetime import datetime, timezone
 import re
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
@@ -10,6 +10,7 @@ from settingsmanager import read_config, write_config
 from utils.database import test_db_connection, init_db, close_db_connection, get_collection
 from utils.create_user_json import create_user_json
 from utils.restart import restart_app
+from utils.unencrypt_and_hash import unecrypt_and_hash
 
 load_dotenv()
 
@@ -115,7 +116,8 @@ async def setup_info(
             {"error": "InvalidEmail", "error_description": "The provided admin email is not valid."},
             status_code=422,
         )
-    admin_password = payload.get("admin_password")
+    admin_password = unecrypt_and_hash(data=payload.get("admin_password"))
+    
     if not admin_password or not isinstance(admin_password, str) or not admin_password.strip():
         return JSONResponse(
             {"error": "MissingField", "error_description": "Field 'admin_password' is required."},
@@ -136,7 +138,8 @@ async def setup_info(
             email=admin_email.strip(),
             password=admin_password.strip(),
             admin=True,
-            enabled=True
+            enabled=True,
+            created_at=str(datetime.now(timezone.utc)),
         )
     )
 

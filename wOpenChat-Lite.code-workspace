@@ -11,7 +11,7 @@
 			"--disable=wrong-import-order",
 			"--disable=missing-module-docstring"
 		],
-		"python.languageServer": "Default",
+		"python.languageServer": "Jedi",
 		"python.pythonPath": ".venv/bin/python3"
 	}
 }
