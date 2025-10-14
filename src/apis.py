@@ -11,6 +11,7 @@ from utils.database import test_db_connection, init_db, close_db_connection, get
 from utils.create_user_json import create_user_json
 from utils.restart import restart_app
 from utils.unencrypt_and_hash import unecrypt_and_hash
+from uuid import uuid4
 
 load_dotenv()
 
@@ -95,7 +96,8 @@ async def setup_info(
             "favicon_url": favicon_url,
             "theme_color": theme_color
         },
-        "mongo_url": mongo_url.strip()
+        "mongo_url": mongo_url.strip(),
+        "secret_key": str(uuid4())
     })
 
     # Then now admin users will be created
@@ -132,6 +134,7 @@ async def setup_info(
     # now to actually create the admin user
     users = await get_collection("users")
 
+    # Insert the admin user into the database
     await users.insert_one(
         create_user_json(
             username=admin_username.strip(),
@@ -143,9 +146,10 @@ async def setup_info(
         )
     )
 
+    # Close the temporary DB connection
     close_db_connection()
 
-    task = asyncio.create_task(restart_app())
+    task = asyncio.create_task(restart_app()) # Restart the app to apply changes
 
     return JSONResponse({
         "success": True,
