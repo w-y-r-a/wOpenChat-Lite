@@ -4,5 +4,14 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.linting.pylintArgs": [
+			"--disable=missing-final-newline",
+			"--disable=trailing-whitespace",
+			"--disable=wrong-import-order",
+			"--disable=missing-module-docstring"
+		],
+		"python.languageServer": "Jedi",
+		"python.pythonPath": ".venv/bin/python3"
+	}
 }

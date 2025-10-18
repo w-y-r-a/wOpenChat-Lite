@@ -1,10 +1,19 @@
+import time
 from fastapi import FastAPI
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse
+from fastapi.exception_handlers import http_exception_handler
 from contextlib import asynccontextmanager
 import uvicorn
 from dotenv import load_dotenv
 from os import getenv
 import logging
-from datetime import datetime, timedelta, timezone
+from settingsmanager import read_config, ensure_config, write_config
+from utils.database import init_db, close_db_connection
+from utils.ensure_indexes import ensure_indexes
+import pathlib
 logger = logging.getLogger(__name__)
 
 load_dotenv()
@@ -15,8 +24,28 @@ async def lifespan(app: FastAPI):
     basically startup scripts
     """
     print("\033[32mINFO\033[0m:     Starting wOpenChat Lite...")
-    yield
-    print("\033[32mINFO\033[0m:     Stopping wOpenChat Lite...")
+    await ensure_config()
+    global THEME_COLOR, FAVICON_URL
+    try:
+        THEME_COLOR = read_config().get("customization").get("theme_color") # pyright: ignore[reportOptionalMemberAccess]
+    except AttributeError:
+        THEME_COLOR = None
+    try:
+        FAVICON_URL = read_config().get("customization").get("favicon_url") # pyright: ignore[reportOptionalMemberAccess]
+    except AttributeError:
+        FAVICON_URL = None
+    await init_db()
+    await ensure_indexes()
+    from routers import router
+    from apis import api
+    app.include_router(router)
+    app.include_router(api, prefix="/api")
+    try:
+        yield
+        print("\033[32mINFO\033[0m:     Stopping wOpenChat Lite...")
+    finally:
+        close_db_connection()
+        print("\033[32mINFO\033[0m:     Stopped wOpenChat Lite.")
 
 app = FastAPI(
     title="wOpenChat Lite",
@@ -24,19 +53,24 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-@app.get("/")
-def root():
-    """
-    lit just the root
-    """
-    return {
-        "status": "healthy",
-        "service": "wOpenChat",
-        "edition": "lite",
-        "version": app.version
-    }
-
-uvicorn.run(
-    app, 
-    host="0.0.0.0"
+templates = Jinja2Templates(
+    directory=pathlib.Path(__file__).parent / "templates" / "errors"
 )
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request, exc):
+    if exc.status_code == 404:
+        return templates.TemplateResponse("404.html", {
+            "request": request,
+            "THEME_COLOR": THEME_COLOR,
+            "FAVICON_URL": FAVICON_URL
+        }, status_code=404)
+    return await http_exception_handler(request, exc)
+
+app.mount("/static", StaticFiles(directory=pathlib.Path(__file__).parent / "static"), name="static")
+
+if __name__ == "__main__":
+    uvicorn.run(
+        app,
+        host="0.0.0.0"
+    )

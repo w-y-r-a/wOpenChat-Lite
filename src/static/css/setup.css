@@ -1,0 +1,40 @@
+input[type=text], input[type=url], input[type=password], input[type=email] {
+    transition: 0.2s;
+    background-color: black;
+    border: 0.5px solid #343434;
+    border-radius: 8px;
+    padding: 15px;
+    color: #d4d4d4;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+input[type=text]:hover, input[type=url]:hover, input[type=password]:hover, input[type=email]:hover {
+    transition: 0.2s;
+    padding: 20px;
+    z-index: 1;
+}
+
+input[type=text]:focus, input[type=url]:focus, input[type=password]:focus, input[type=email]:focus {
+    border: 1px solid #363636;
+}
+
+form {
+    width: 100%;
+}
+
+.required {
+    color: red;
+    font-weight: bold;
+}
+
+input[type=color] {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 0;
+    border: none;
+    width: 100%;
+}

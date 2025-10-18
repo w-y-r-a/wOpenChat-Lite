@@ -1,0 +1,143 @@
+<!--
+                                                                                                                    ,--,
+                  ,----..                                                                                        ,---.'|
+                 /   /   \                                   ,----..    ,---,                   ___              |   | :              ___
+                /   .     : ,-.----.                        /   /   \ ,--.' |                 ,--.'|_            :   : |     ,--,   ,--.'|_
+         .---. .   /   ;.  \\    /  \                ,---, |   :     :|  |  :                 |  | :,'     ,---,.|   ' :   ,--.'|   |  | :,'
+        /. ./|.   ;   /  ` ;|   :    |           ,-+-. /  |.   |  ;. /:  :  :                 :  : ' :   ,'  .' |;   ; '   |  |,    :  : ' :
+     .-'-. ' |;   |  ; \ ; ||   | .\ :   ,---.  ,--.'|'   |.   ; /--` :  |  |,--.  ,--.--.  .;__,'  /  ,---.'   ,'   | |__ `--'_  .;__,'  /     ,---.
+    /___/ \: ||   :  | ; | '.   : |: |  /     \|   |  ,"' |;   | ;    |  :  '   | /       \ |  |   |   |   |    ||   | :.'|,' ,'| |  |   |     /     \
+ .-'.. '   ' ..   |  ' ' ' :|   |  \ : /    /  |   | /  | ||   : |    |  |   /' :.--.  .-. |:__,'| :   :   :  .' '   :    ;'  | | :__,'| :    /    /  |
+/___/ \:     ''   ;  \; /  ||   : .  |.    ' / |   | |  | |.   | '___ '  :  | | | \__\/: . .  '  : |__ :   |.'   |   |  ./ |  | :   '  : |__ .    ' / |
+.   \  ' .\    \   \  ',  / :     |`-''   ;   /|   | |  |/ '   ; : .'||  |  ' | : ," .--.; |  |  | '.'|`---'     ;   : ;   '  : |__ |  | '.'|'   ;   /|
+ \   \   ' \ |  ;   :    /  :   : :   '   |  / |   | |--'  '   | '/  :|  :  :_:,'/  /  ,.  |  ;  :    ;          |   ,/    |  | '.'|;  :    ;'   |  / |
+  \   \  |--"    \   \ .'   |   | :   |   :    |   |/      |   :    / |  | ,'   ;  :   .'   \ |  ,   /           '---'     ;  :    ;|  ,   / |   :    |
+   \   \ |        `---`     `---'.|    \   \  /'---'        \   \ .'  `--''     |  ,     .-./  ---`-'                      |  ,   /  ---`-'   \   \  /
+    '---"                     `---`     `----'               `---`               `--`---'                                   ---`-'             `----'
+-->
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+    <title>Setup | WOC-Lite</title>
+    <link rel="icon" type="image/x-icon" href="/static/img/light/favicon-64.png"> <!-- Because setup has NOT been completed yet, we will use default -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/setup.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="wOpenChat-Lite is a more lightweight version of wOpenChat, a web-based chat application that allows users to communicate in real-time.">
+    <meta name="theme-color" content="{{ THEME_COLOR }}">
+    <meta name="og:title" content="wOpenChat-Lite">
+    <meta name="og:description" content="wOpenChat-Lite is a more lightweight version of wOpenChat, a web-based chat application that allows users to communicate in real-time.">
+    <meta name="og:image" content="/static/img/light/favicon-64.png">
+    <meta name="og:type" content="website">
+</head>
+<body>
+    <h1 style="text-align: center">wOpenChat-Lite Setup</h1>
+    <script>
+    </script>
+    <div class="pamphlet">
+        <form onsubmit="submitSetup(event); return false;">
+            <h2>General</h2>
+            <hr>
+            <label for="instancename">Instance Name</label><br>
+            <input type="text" placeholder="wOpenChat-Lite (Default)" id="instancename" name="instancename"><br>
+            <label for="favicon_url">Favicon URL</label><br>
+            <input type="url" placeholder="/static/img/favicon.ico (Default) 32-128 pixels is recommended." id="favicon_url" name="favicon_url"><br>
+            <label for="theme_color">Theme Color</label><br>
+            <input type="color" value="#0925C2" id="theme_color" name="theme_color"><br>
+            <label for="mongo_url">MongoDB Connection URL <span class="required">*</span></label><br>
+            <input type="text" placeholder="mongodb://localhost:27017" id="mongo_url" name="mongo_url" required><br>
+
+            <h2>Admin Setup</h2>
+            <hr>
+            <label for="admin_username">Admin Username <span class="required">*</span></label><br>
+            <input type="text" placeholder="admin" id="admin_username" name="admin_username" required><br>
+            <label for="admin_email">Admin Email <span class="required">*</span></label><br>
+            <input type="email" placeholder="admin@example.com" id="admin_email" name="admin_email" required><br>
+            <label for="admin_password">Admin Password <span class="required">*</span></label><br>
+            <input type="password" placeholder="YourStrongPassword123!" id="admin_password" name="admin_password" required><br>
+            <input type="submit" value="Submit Setup">
+            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+            <script>
+                function submitSetup(event) {
+                    // Prevent form submission
+                    event.preventDefault();
+
+                    // validation
+                    if (!document.getElementById("mongo_url").value) {
+                        const mongo_url = document.getElementById("mongo_url");
+                        mongo_url.style.border = "1px solid red";
+                        return;
+                    }
+                    else if (!/^mongodb(\+srv)?:\/\/.*/.test(document.getElementById("mongo_url").value)) {
+                        alert("Please enter a valid MongoDB connection URL. (It should start with 'mongodb://' or 'mongodb+srv://')");
+                        const mongo_url = document.getElementById("mongo_url");
+                        mongo_url.style.border = "1px solid red";
+                        return;
+                    }
+                    else if (!document.getElementById("admin_username").value) {
+                        const admin_username = document.getElementById("admin_username");
+                        admin_username.style.border = "1px solid red";
+                        return;
+                    }
+                    else if (!document.getElementById("admin_email").value) {
+                        const admin_email = document.getElementById("admin_email");
+                        admin_email.style.border = "1px solid red";
+                        return;
+                    }
+                    else if (!/^[^@]+@[^@]+\.[^@]+$/.test(document.getElementById("admin_email").value)) {
+                        alert("Please enter a valid email address.");
+                        const admin_email = document.getElementById("admin_email");
+                        admin_email.style.border = "1px solid red";
+                        return;
+                    }
+                    else if (!document.getElementById("admin_password").value) {
+                        const admin_password = document.getElementById("admin_password");
+                        admin_password.style.border = "1px solid red";
+                        return;
+                    }
+
+                    // general
+
+                    let instance_name = document.getElementById("instancename").value;
+                    let favicon_url = document.getElementById("favicon_url").value;
+                    let theme_color = document.getElementById("theme_color").value;
+                    let mongo_url = btoa(document.getElementById("mongo_url").value); // Sensitive data(Connection URL may contain username/password)
+                    // admin
+                    let admin_username = document.getElementById("admin_username").value;
+                    let admin_email = document.getElementById("admin_email").value;
+                    let admin_password = btoa(document.getElementById("admin_password").value); // Sensitive data
+                    let json_req = {
+                        "instance_name": instance_name,
+                        "favicon_url": favicon_url,
+                        "mongo_url": mongo_url,
+                        "theme_color": theme_color,
+                        "admin_username": admin_username,
+                        "admin_password": admin_password,
+                        "admin_email": admin_email
+                    };
+
+                    const request = axios.create({
+                        baseURL: '/api',
+                        });
+
+                    // handle the request
+                    request({
+                        method: 'post',
+                        url: '/setup-info',
+                        data: json_req
+                    }).then((response) => {
+                        setTimeout(function(){
+                            location.reload();
+                        }, 2000);
+                        alert(response.data.message);
+                    }).catch((error) => {
+                        const errorMsg = error.response?.data?.error_message || "An error occurred while submitting the setup information. Please try again.";
+                        alert(errorMsg);
+                        console.error(error);
+                    });
+                }
+            </script>
+        </form>
+    </div>
+</body>
