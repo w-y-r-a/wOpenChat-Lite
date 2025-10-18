@@ -3,7 +3,7 @@ import sys
 import os
 
 async def restart_app():
-    print("\033[33mWARN\033[0m:     Restarting...(in 1 seconds)")
+    print("\033[33mWARN\033[0m:     Restarting...(in 1 second)")
     await asyncio.sleep(1)
     python = sys.executable
-    os.execv(python, [python] + sys.argv)
+    os.execv(python, [python, *sys.argv])

@@ -11,7 +11,7 @@ except AttributeError:
     THEME_COLOR = None
 try:
     FAVICON_URL = read_config().get("customization").get("favicon_url") # pyright: ignore[reportOptionalMemberAccess]
-except:
+except AttributeError:
     FAVICON_URL = None
 
 async def root_handler(request: Request, response: Response):

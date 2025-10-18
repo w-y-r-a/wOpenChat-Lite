@@ -95,11 +95,8 @@ async def setup_info(
             status_code=400,
         )
 
-    await init_db() # Temporarily initialize DB for admin user creation
-
     write_config({
         "global": {
-            "setup_complete": True,
             "instance_name": instance_name,
         },
         "customization": {
@@ -109,6 +106,8 @@ async def setup_info(
         "mongo_url": mongo_url.strip(),
         "secret_key": str(uuid4())
     })
+
+    await init_db()  # Temporarily initialize DB for admin user creation
 
     # Then now admin users will be created
     admin_username = payload.get("admin_username")
@@ -158,7 +157,7 @@ async def setup_info(
 
     # Close the temporary DB connection
     close_db_connection()
-
+    write_config({"global": {"setup_complete": True}})
     task = asyncio.create_task(restart_app()) # Restart the app to apply changes
 
     return JSONResponse({

@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
         THEME_COLOR = None
     try:
         FAVICON_URL = read_config().get("customization").get("favicon_url") # pyright: ignore[reportOptionalMemberAccess]
-    except:
+    except AttributeError:
         FAVICON_URL = None
     await init_db()
     await ensure_indexes()

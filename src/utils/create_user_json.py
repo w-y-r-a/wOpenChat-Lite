@@ -1,9 +1,10 @@
 import json
-from typing import Optional
+from typing import Optional, Any
 from uuid import uuid4
 import datetime
 
-def create_user_json(username: str, email: str, password: str, admin: Optional[bool], enabled: bool, created_at) -> str:
+def create_user_json(username: str, email: str, password: str, admin: Optional[bool], enabled: bool, created_at) -> \
+dict[str, str | bool | None | Any]:
     json_data =  {
         "sub": str(uuid4()),
         "username": username,
@@ -13,4 +14,4 @@ def create_user_json(username: str, email: str, password: str, admin: Optional[b
         "enabled": enabled,
         "created_at": created_at,
     }
-    return json.dumps(json_data, indent=4)
+    return json_data
