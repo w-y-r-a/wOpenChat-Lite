@@ -2,15 +2,16 @@
 import json
 import pathlib
 import os
+import anyio
 CONFIG_PATH = pathlib.Path(__file__).parent / "config.json"
 
 async def ensure_config():
     try:
-        with open(CONFIG_PATH, "r"):
+        async with await anyio.open_file(CONFIG_PATH, "r"):
             print(f"\033[32mINFO\033[0m:     Settings Manager Up! Path: {CONFIG_PATH}")
     except FileNotFoundError:
         print("\033[33mWARN\033[0m:     Settings file not found! Creating...")
-        with open(CONFIG_PATH, "x"):
+        async with await anyio.open_file(CONFIG_PATH, "x"):
             print(f"\033[32mINFO\033[0m:     File created! Path: {CONFIG_PATH}")
 
 def read_config():
