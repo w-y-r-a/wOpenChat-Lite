@@ -8,6 +8,5 @@ pyjwt
 aiohttp
 python-dotenv
 bcrypt
-configparser
 jinja2
 aiofiles

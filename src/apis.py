@@ -38,6 +38,7 @@ async def setup_info(
         request: Request,
         response: Response,
 ):
+    global mongo_url_b64
     if setup_complete:
         return JSONResponse(
             {"error": "SetupAlreadyCompleted", "error_description": "The setup has already been completed."},
@@ -60,11 +61,16 @@ async def setup_info(
         )
 
     instance_name = payload.get("instance_name", "wOpenChat-Lite")
-    decoded_bytes = base64.b64decode(payload.get("mongo_url"))
-    # Convert bytes to a string (assuming UTF-8 encoding)
-    mongo_url = decoded_bytes.decode('utf-8')
-    favicon_url = payload.get("favicon_url", "/static/img/favicon.ico")
-    theme_color = payload.get("theme_color", "#0925C2")
+    mongo_url_b64 = payload.get("mongo_url")
+
+    if not mongo_url_b64 or not isinstance(mongo_url_b64, str):
+        return JSONResponse({"error": "MissingField", "error_description": "Field 'mongo_url' is required."},status_code=422)
+
+    try:
+        decoded_bytes = base64.b64decode(mongo_url_b64, validate=True)
+        mongo_url = decoded_bytes.decode("utf-8")
+    except Exception:
+        return JSONResponse({"error": "InvalidMongoURL", "error_description": "mongo_url must be valid base64."},status_code=422)
 
     if not mongo_url or not isinstance(mongo_url, str) or not mongo_url.strip():
         return JSONResponse(
