@@ -127,17 +127,13 @@
                         url: '/setup-info',
                         data: json_req
                     }).then((response) => {
-                        if (response.status === 200) {
-                            setTimeout(function(){
-                                location.reload();
-                            }, 2000);
-                            alert(response.data.message);
-                        }
-                        else {
-                            alert("Error: " + response.data.error_message);
-                        }
+                        setTimeout(function(){
+                            location.reload();
+                        }, 2000);
+                        alert(response.data.message);
                     }).catch((error) => {
-                        alert("An error occurred while submitting the setup information. Please try again.");
+                        const errorMsg = error.response?.data?.error_message || "An error occurred while submitting the setup information. Please try again.";
+                        alert(errorMsg);
                         console.error(error);
                     });
                 }

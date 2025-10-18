@@ -10,7 +10,7 @@ from settingsmanager import read_config, write_config
 from utils.database import test_db_connection, init_db, close_db_connection, get_collection
 from utils.create_user_json import create_user_json
 from utils.restart import restart_app
-from utils.unencrypt_and_hash import unecrypt_and_hash
+from utils.unencode_and_hash import unencode, hash_password
 from uuid import uuid4
 
 load_dotenv()
@@ -59,7 +59,6 @@ async def setup_info(
             status_code=400,
         )
 
-    decoded_bytes = base64.b64decode(payload.get("mongo_url"))
     # Convert bytes to a string (assuming UTF-8 encoding)
     favicon_url = payload.get("favicon_url", "/static/img/favicon.ico")
     theme_color = payload.get("theme_color", "#0925C2")
@@ -129,7 +128,7 @@ async def setup_info(
             {"error": "InvalidEmail", "error_description": "The provided admin email is not valid."},
             status_code=422,
         )
-    admin_password = unecrypt_and_hash(data=payload.get("admin_password"))
+    admin_password = unencode(data=payload.get("admin_password"))
     
     if not admin_password or not isinstance(admin_password, str) or not admin_password.strip():
         return JSONResponse(
@@ -150,7 +149,7 @@ async def setup_info(
         create_user_json(
             username=admin_username.strip(),
             email=admin_email.strip(),
-            password=admin_password.strip(),
+            password=hash_password(admin_password.strip()),
             admin=True,
             enabled=True,
             created_at=str(datetime.now(timezone.utc)),

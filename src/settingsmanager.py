@@ -48,7 +48,8 @@ def write_config(content: dict) -> bool:
     # Update the dictionary with the new content.
     data.update(content)
 
-    with open(CONFIG_PATH, "w") as f:
+    tmp_path = CONFIG_PATH.with_suffix(".tmp")
+    with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
-        
+    os.replace(tmp_path, CONFIG_PATH)
     return True

@@ -22,39 +22,38 @@ async def init_db():
         setup_complete = settingsmanager.read_config().get("global").get("setup_complete")  # pyright: ignore[reportOptionalMemberAccess]
     except AttributeError:
         setup_complete = False
-    if setup_complete:
-        print("\033[32mINFO\033[0m:     Setup Complete!")
     if not setup_complete:
         print("\033[32mINFO\033[0m:     Setup not complete!")
         return False
-    elif not setup_complete:
-        return False
-    else:
-        print()
-        MONGO_URL = settingsmanager.read_config().get("mongo_url")
-        global client, db
-        try:
-            client = AsyncIOMotorClient(
-                MONGO_URL,
-                maxPoolSize=50,
-                connectTimeoutMS=5000,
-                serverSelectionTimeoutMS=5000,
-                waitQueueTimeoutMS=5000,
-            )
+    print("\033[32mINFO\033[0m:     Setup Complete!")
+    MONGO_URL = settingsmanager.read_config().get("mongo_url")
+    if not MONGO_URL:
+        raise ValueError("\033[31mERROR\033[0m:     Missing 'mongo_url' in config.")
+    global client, db
+    try:
+        client = AsyncIOMotorClient(
+            MONGO_URL,
+            maxPoolSize=50,
+            connectTimeoutMS=5000,
+            serverSelectionTimeoutMS=5000,
+            waitQueueTimeoutMS=5000,
+        )
 
-            await client.admin.command("ping")
-            print("\033[32mINFO\033[0m:     Connected to MongoDB!")
-            db = client["wOpenChat"]
+        await client.admin.command("ping")
+        print("\033[32mINFO\033[0m:     Connected to MongoDB!")
+        db = client["wOpenChat"]
 
-            return True
-        except ConnectionFailure as e:
-            raise Exception(f"\033[31mERROR\033[0m:     Failed to connect to MongoDB: {str(e)}") from e
+        return True
+    except ConnectionFailure as e:
+        raise Exception(f"\033[31mERROR\033[0m:     Failed to connect to MongoDB: {str(e)}") from e
 
 async def get_collection(collection_name: str):
     global db
     if db is None:
-        await init_db()
-    return db[collection_name] # pyright: ignore[reportOptionalSubscript]
+        ok = await init_db()
+        if not ok or db is None:
+            raise RuntimeError("Database is not initialized; call init_db() after completing setup.")
+    return db[collection_name]  # pyright: ignore[reportOptionalSubscript]
 
 # Doesn't need to be async since it's just closing the connection
 def close_db_connection():
@@ -90,5 +89,5 @@ async def test_db_connection(URL) -> bool:
         print("\033[32mINFO\033[0m:     MongoDB connection test successful!")
         return True
     except ConnectionFailure as e:
-        print(f"\033[31mERROR\033[0m:     MongoDB connection test failed: {str(e)}")
+        print(f"\033[31mERROR\033[0m:     MongoDB connection test failed: {e!s}")
         return False

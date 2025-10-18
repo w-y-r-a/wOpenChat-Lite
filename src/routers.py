@@ -7,15 +7,15 @@ from service import root_handler
 
 try:
     THEME_COLOR = read_config().get("customization").get("theme_color") # pyright: ignore[reportOptionalMemberAccess]
-except AttributeError:
+except (AttributeError, KeyError, TypeError):
     THEME_COLOR = None
 try:
     FAVICON_URL = read_config().get("customization").get("favicon_url") # pyright: ignore[reportOptionalMemberAccess]
-except:
+except (AttributeError, KeyError, TypeError):
     FAVICON_URL = None
 try:
     setup_complete = read_config().get("global").get("setup_complete") # pyright: ignore[reportOptionalMemberAccess]
-except:
+except (AttributeError, KeyError, TypeError):
     setup_complete = False
 
 templates = Jinja2Templates(

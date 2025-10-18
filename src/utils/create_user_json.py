@@ -3,7 +3,7 @@ from typing import Optional
 from uuid import uuid4
 import datetime
 
-def create_user_json(username: str, email: str, password: str, admin: Optional[bool], enabled: bool, created_at) -> dict:
+def create_user_json(username: str, email: str, password: str, admin: Optional[bool], enabled: bool, created_at) -> str:
     json_data =  {
         "sub": str(uuid4()),
         "username": username,
@@ -13,5 +13,4 @@ def create_user_json(username: str, email: str, password: str, admin: Optional[b
         "enabled": enabled,
         "created_at": created_at,
     }
-    json.dumps(json_data, indent=4)
-    return json_data
+    return json.dumps(json_data, indent=4)

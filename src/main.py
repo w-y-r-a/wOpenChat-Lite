@@ -67,13 +67,10 @@ async def custom_http_exception_handler(request, exc):
         }, status_code=404)
     return await http_exception_handler(request, exc)
 
-@app.exception_handler(AttributeError)
-def handle_attribute_error():
-    return None
-
 app.mount("/static", StaticFiles(directory=pathlib.Path(__file__).parent / "static"), name="static")
 
-uvicorn.run(
-    app, 
-    host="0.0.0.0"
-)
+if __name__ == "__main__":
+    uvicorn.run(
+        app,
+        host="0.0.0.0"
+    )
