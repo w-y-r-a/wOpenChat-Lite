@@ -1,5 +1,5 @@
 <div align="center">
-<p align="center"><img width=150px src="https://raw.githubusercontent.com/w-y-r-a/.github/refs/heads/main/images/wOpenChat/Light.png" alt="WOC Logo"></p>
+<p align="center"><img width=150px src="https://raw.githubusercontent.com/w-y-r-a/.github/refs/heads/main/images/wOpenChat/light-500.png" alt="WOC Logo"></p>
 
 <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License"> 
 <a href="https://sonarcloud.io/summary/new_code?id=w-y-r-a_wOpenChat-Lite">
