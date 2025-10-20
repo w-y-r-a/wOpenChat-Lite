@@ -12,6 +12,6 @@
 			"--disable=missing-module-docstring"
 		],
 		"python.languageServer": "Jedi",
-		"python.pythonPath": ".venv/bin/python3"
+		"python.pythonPath": ".venv/bin/python3.12"
 	}
 }

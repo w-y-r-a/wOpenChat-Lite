@@ -61,6 +61,8 @@ async def setup_info(
 
     # Convert bytes to a string (assuming UTF-8 encoding)
     favicon_url = payload.get("favicon_url", "/static/img/favicon.ico")
+    if favicon_url.strip() == " " or "":
+        favicon_url = "/static/img/favicon.ico"
     theme_color = payload.get("theme_color", "#0925C2")
     instance_name = payload.get("instance_name", "wOpenChat-Lite")
     mongo_url_b64 = payload.get("mongo_url")
@@ -98,6 +100,7 @@ async def setup_info(
     write_config({
         "global": {
             "instance_name": instance_name,
+            "setup_complete": True
         },
         "customization": {
             "favicon_url": favicon_url,
@@ -107,7 +110,7 @@ async def setup_info(
         "secret_key": str(uuid4())
     })
 
-    await init_db()  # Temporarily initialize DB for admin user creation
+    # we dont need to init db cause get_collection already does that
 
     # Then now admin users will be created
     admin_username = payload.get("admin_username")
@@ -139,7 +142,6 @@ async def setup_info(
             {"error": "WeakPassword", "error_description": "Admin password must be at least 8 characters long."},
             status_code=400,
         )
-
     # now to actually create the admin user
     users = await get_collection("users")
 
@@ -157,7 +159,7 @@ async def setup_info(
 
     # Close the temporary DB connection
     close_db_connection()
-    write_config({"global": {"setup_complete": True}})
+    #write_config({"global": {"setup_complete": True}})
     task = asyncio.create_task(restart_app()) # Restart the app to apply changes
 
     return JSONResponse({

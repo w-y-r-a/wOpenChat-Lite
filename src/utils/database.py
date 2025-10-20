@@ -48,9 +48,9 @@ async def init_db():
         raise Exception(f"\033[31mERROR\033[0m:     Failed to connect to MongoDB: {str(e)}") from e
 
 async def get_collection(collection_name: str):
-    global db
     if db is None:
         ok = await init_db()
+        print(ok)
         if not ok or db is None:
             raise RuntimeError("Database is not initialized; call init_db() after completing setup.")
     return db[collection_name]  # pyright: ignore[reportOptionalSubscript]

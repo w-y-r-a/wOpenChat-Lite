@@ -10,10 +10,13 @@ import uvicorn
 from dotenv import load_dotenv
 from os import getenv
 import logging
-from settingsmanager import read_config, ensure_config, write_config
-from utils.database import init_db, close_db_connection
-from utils.ensure_indexes import ensure_indexes
 import pathlib
+import os
+import sys
+sys.path.insert(1, os.getcwd())
+from src.settingsmanager import read_config, ensure_config, write_config
+from src.utils.database import init_db, close_db_connection
+from src.utils.ensure_indexes import ensure_indexes
 logger = logging.getLogger(__name__)
 
 load_dotenv()
@@ -36,8 +39,8 @@ async def lifespan(app: FastAPI):
         FAVICON_URL = None
     await init_db()
     await ensure_indexes()
-    from routers import router
-    from apis import api
+    from src.routers import router
+    from src.apis import api
     app.include_router(router)
     app.include_router(api, prefix="/api")
     try:
