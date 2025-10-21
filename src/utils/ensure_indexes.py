@@ -1,5 +1,8 @@
 from .database import get_collection
-from src import settingsmanager
+import os
+import sys
+sys.path.insert(1, os.getcwd())
+import src.settingsmanager as settingsmanager
 
 async def ensure_indexes():
     try:

@@ -6,12 +6,15 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from os import getenv
+from uuid import uuid4
+import os
+import sys
+sys.path.insert(1, os.getcwd())
 from settingsmanager import read_config, write_config
 from utils.database import test_db_connection, init_db, close_db_connection, get_collection
 from utils.create_user_json import create_user_json
 from utils.restart import restart_app
 from utils.unencode_and_hash import unencode, hash_password
-from uuid import uuid4
 
 load_dotenv()
 

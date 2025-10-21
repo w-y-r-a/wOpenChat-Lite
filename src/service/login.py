@@ -1,5 +1,8 @@
 import jwt
 from datetime import datetime, timedelta, timezone
+import os
+import sys
+sys.path.insert(1, os.getcwd())
 from src.settingsmanager import read_config, ensure_config, write_config
 
 SECRET_KEY = read_config().get("secret_key")

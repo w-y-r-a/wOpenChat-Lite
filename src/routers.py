@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
-from settingsmanager import read_config
 import pathlib
+import os
+import sys
+sys.path.insert(1, os.getcwd())
 from service import root_handler
+from settingsmanager import read_config
 
 try:
     THEME_COLOR = read_config().get("customization").get("theme_color") # pyright: ignore[reportOptionalMemberAccess]
