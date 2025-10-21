@@ -10,7 +10,7 @@ from uuid import uuid4
 import os
 import sys
 sys.path.insert(1, os.getcwd())
-from settingsmanager import read_config, write_config
+from settingsmanager import read_config, write_config, async_write_config
 from utils.database import test_db_connection, init_db, close_db_connection, get_collection
 from utils.create_user_json import create_user_json
 from utils.restart import restart_app
@@ -169,3 +169,12 @@ async def setup_info(
         "success": True,
         "message": "Setup complete, restarting wOpenChat-Lite to apply changes."
     })
+
+@api.get("/testing")
+async def async_file_test():
+    await async_write_config(
+        {
+            "67?": "idk"
+        }
+    )
+    
