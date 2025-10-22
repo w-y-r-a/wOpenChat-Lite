@@ -100,7 +100,7 @@ async def setup_info(
             status_code=400,
         )
 
-    write_config({
+    await async_write_config({
         "global": {
             "instance_name": instance_name,
             "setup_complete": True

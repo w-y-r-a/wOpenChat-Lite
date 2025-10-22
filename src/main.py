@@ -14,7 +14,7 @@ import pathlib
 import os
 import sys
 sys.path.insert(1, os.getcwd())
-from src.settingsmanager import read_config, ensure_config, write_config
+from src.settingsmanager import read_config, ensure_config
 from src.utils.database import init_db, close_db_connection
 from src.utils.ensure_indexes import ensure_indexes
 logger = logging.getLogger(__name__)
