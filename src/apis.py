@@ -17,6 +17,7 @@ from utils.restart import restart_app
 from utils.unencode_and_hash import unencode, hash_password
 from models.register_data import RegisterData
 from models.login_data import LoginData
+from models.userinfo import UserInfo
 
 load_dotenv()
 
@@ -175,6 +176,7 @@ async def setup_info(
 if setup_complete == True:
     from service.register import register
     from service.login import login
+    from service.userinfo import get_user_info
     @api.post("/register")
     async def register_user(
         request: Request,
@@ -188,3 +190,10 @@ if setup_complete == True:
         data: LoginData,
     ):
         return await login(data=data, request=request)
+
+    @api.post("/userinfo")
+    async def user_info(
+        request: Request,
+        data: UserInfo
+    ):
+        return await get_user_info(request=request, data=data)

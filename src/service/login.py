@@ -5,13 +5,11 @@ from bcrypt import checkpw
 import os
 import sys
 sys.path.insert(1, os.getcwd())
-from src.settingsmanager import read_config
 from src.models.login_data import LoginData
 from src.utils.database import get_collection
 from src.utils.unencode_and_hash import hash_password
 from src.utils.jwt_token import create_jwt_token
 
-SECRET_KEY = read_config().get("secret_key")
 
 async def login(data: LoginData, request: Request) -> JSONResponse:
     ip_addr = request.headers.get("CF-Connecting-IP") or request.headers.get("X-Forwarded-For") or request.client.host
@@ -30,6 +28,14 @@ async def login(data: LoginData, request: Request) -> JSONResponse:
             }, status_code=404,
         )
 
+    if user.get("enabled") is False:
+        return JSONResponse(
+            {
+                "error": "UserDisabled",
+                "error_description": "The user account is disabled."
+            }, status_code=403
+        )
+
     stored_hashed_password = user.get("password")
     if isinstance(stored_hashed_password, str):
         stored_hashed_password = stored_hashed_password.encode()
@@ -39,7 +45,7 @@ async def login(data: LoginData, request: Request) -> JSONResponse:
 
     # prepare to create session and token
 
-    sub = user.get("username")
+    sub = user.get("sub")
 
     session_id = os.urandom(16).hex()
     refresh_token = os.urandom(32).hex()

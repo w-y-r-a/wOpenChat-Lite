@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import jwt
+from typing import Dict
 import os
 import sys
 sys.path.insert(1, os.getcwd())
@@ -31,3 +32,13 @@ def create_jwt_token(data: dict, host: str, exp: Optional[int]) -> str:
     })
 
     return jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
+
+def decode_jwt_token(token: str) -> Dict:
+    """Decode and validate a JWT token"""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise ValueError("Token has expired")
+    except jwt.InvalidTokenError as e:
+        raise ValueError(f"Invalid token: {str(e)}")
