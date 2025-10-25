@@ -6,12 +6,18 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from os import getenv
-from settingsmanager import read_config, write_config
+from uuid import uuid4
+import os
+import sys
+sys.path.insert(1, os.getcwd())
+from settingsmanager import read_config, write_config, async_write_config, async_read_config
 from utils.database import test_db_connection, init_db, close_db_connection, get_collection
 from utils.create_user_json import create_user_json
 from utils.restart import restart_app
 from utils.unencode_and_hash import unencode, hash_password
-from uuid import uuid4
+from models.register_data import RegisterData
+from models.login_data import LoginData
+from models.userinfo import UserInfo
 
 load_dotenv()
 
@@ -97,7 +103,7 @@ async def setup_info(
             status_code=400,
         )
 
-    write_config({
+    await async_write_config({
         "global": {
             "instance_name": instance_name,
             "setup_complete": True
@@ -166,3 +172,28 @@ async def setup_info(
         "success": True,
         "message": "Setup complete, restarting wOpenChat-Lite to apply changes."
     })
+
+if setup_complete == True:
+    from service.register import register
+    from service.login import login
+    from service.userinfo import get_user_info
+    @api.post("/register")
+    async def register_user(
+        request: Request,
+        data: RegisterData,
+    ):
+        return await register(data=data, request=request)
+
+    @api.post("/login")
+    async def login_user(
+        request: Request,
+        data: LoginData,
+    ):
+        return await login(data=data, request=request)
+
+    @api.post("/userinfo")
+    async def user_info(
+        request: Request,
+        data: UserInfo
+    ):
+        return await get_user_info(request=request, data=data)

@@ -14,9 +14,10 @@ import pathlib
 import os
 import sys
 sys.path.insert(1, os.getcwd())
-from src.settingsmanager import read_config, ensure_config, write_config
+from src.settingsmanager import read_config, ensure_config
 from src.utils.database import init_db, close_db_connection
 from src.utils.ensure_indexes import ensure_indexes
+from src.utils.config import get_customization_config
 logger = logging.getLogger(__name__)
 
 load_dotenv()
@@ -29,14 +30,9 @@ async def lifespan(app: FastAPI):
     print("\033[32mINFO\033[0m:     Starting wOpenChat Lite...")
     await ensure_config()
     global THEME_COLOR, FAVICON_URL
-    try:
-        THEME_COLOR = read_config().get("customization").get("theme_color") # pyright: ignore[reportOptionalMemberAccess]
-    except AttributeError:
-        THEME_COLOR = None
-    try:
-        FAVICON_URL = read_config().get("customization").get("favicon_url") # pyright: ignore[reportOptionalMemberAccess]
-    except AttributeError:
-        FAVICON_URL = None
+    config = get_customization_config()
+    THEME_COLOR = config["theme_color"]
+    FAVICON_URL = config["favicon_url"]
     await init_db()
     await ensure_indexes()
     from src.routers import router
@@ -59,6 +55,20 @@ app = FastAPI(
 templates = Jinja2Templates(
     directory=pathlib.Path(__file__).parent / "templates" / "errors"
 )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc):
+    # Log the exception here for debugging!
+    print(f"An unexpected error occurred: {exc}") 
+    
+    if isinstance(exc, StarletteHTTPException):
+        return await custom_http_exception_handler(request, exc)
+
+    return JSONResponse({
+        "error": 500,
+        "error_description": "An Internal Server error has occurred.",
+        "report": "Please report this to https://github.com/w-y-r-a/wOpenChat-Lite/issues"
+    }, status_code=500)
 
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request, exc):
