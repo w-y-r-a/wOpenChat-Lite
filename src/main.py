@@ -60,6 +60,20 @@ templates = Jinja2Templates(
     directory=pathlib.Path(__file__).parent / "templates" / "errors"
 )
 
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc):
+    # Log the exception here for debugging!
+    print(f"An unexpected error occurred: {exc}") 
+    
+    if isinstance(exc, StarletteHTTPException):
+        return await custom_http_exception_handler(request, exc)
+
+    return JSONResponse({
+        "error": 500,
+        "error_description": "An Internal Server error has occurred.",
+        "report": "Please report this to https://github.com/w-y-r-a/wOpenChat-Lite/issues"
+    }, status_code=500)
+
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request, exc):
     if exc.status_code == 404:

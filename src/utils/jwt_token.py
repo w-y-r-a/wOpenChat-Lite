@@ -1,22 +1,27 @@
-import jwt
 from datetime import datetime, timedelta, timezone
+from typing import Optional
+import jwt
 import os
 import sys
 sys.path.insert(1, os.getcwd())
-from src.settingsmanager import read_config, ensure_config, write_config
+from src.settingsmanager import read_config
 
 SECRET_KEY = read_config().get("secret_key")
 
-def create_jwt_token(data: dict, host: str) -> str:
+def create_jwt_token(data: dict, host: str, exp: Optional[int]) -> str:
     """
-    Creates a JWT token with given data and a 30-minute expiration time.
+    Creates a JWT token with given data and a user set expiration time.
     Args:
+        exp (int): Expiration time in minutes.(If None, defaults to 30 minutes)
         data (dict): The data to encode in the JWT token.
         host (str): The "Host" header accessed via the FastAPI request(or really just anything but mainly that).
     Returns:
         str: The encoded JWT token.
     """
-    expiration = datetime.now(timezone.utc) + timedelta(minutes=30)
+    if exp is None:
+        exp = 30  # Default expiration time in minutes
+
+    expiration = datetime.now(timezone.utc) + timedelta(minutes=exp)
 
     to_encode = data.copy()
     to_encode.update({

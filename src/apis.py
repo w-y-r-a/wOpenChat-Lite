@@ -15,6 +15,8 @@ from utils.database import test_db_connection, init_db, close_db_connection, get
 from utils.create_user_json import create_user_json
 from utils.restart import restart_app
 from utils.unencode_and_hash import unencode, hash_password
+from service.register import register
+from models.register_data import RegisterData
 
 load_dotenv()
 
@@ -169,3 +171,11 @@ async def setup_info(
         "success": True,
         "message": "Setup complete, restarting wOpenChat-Lite to apply changes."
     })
+
+if setup_complete == True:
+    @api.post("/register")
+    async def register_user(
+        request: Request,
+        data: RegisterData,
+    ):
+        return await register(data=data, request=request)
