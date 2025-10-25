@@ -8,11 +8,11 @@ sys.path.insert(1, os.getcwd())
 from src.models.login_data import LoginData
 from src.utils.database import get_collection
 from src.utils.unencode_and_hash import hash_password
-from src.utils.jwt_token import create_jwt_token
+from src.utils.session import create_session_and_token, get_client_ip
 
 
 async def login(data: LoginData, request: Request) -> JSONResponse:
-    ip_addr = request.headers.get("CF-Connecting-IP") or request.headers.get("X-Forwarded-For") or request.client.host
+    ip_addr = get_client_ip(request)
     users = await get_collection("users")
     sessions = await get_collection("sessions")
 
@@ -46,28 +46,11 @@ async def login(data: LoginData, request: Request) -> JSONResponse:
 
     sub = user.get("sub")
 
-    session_id = os.urandom(16).hex()
-    refresh_token = os.urandom(32).hex()
-    token_data = {"sub": sub, "sid": session_id}
-
-    token = create_jwt_token(token_data, request.headers.get("host", ""), exp=30)
-
-    await sessions.insert_one(
-        {
-            "sub": sub,
-            "session_id": session_id,
-            "ip_address": ip_addr,
-            "refresh_token": refresh_token,
-            "created_at": datetime.now(timezone.utc),
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
-        }
+    session_token_data = await create_session_and_token(
+        sub=sub,
+        ip_addr=ip_addr,
+        request=request,
+        sessions=sessions
     )
 
-    return JSONResponse(
-        {
-            "access_token": token,
-            "token_type": "bearer",
-            "expires_in": 1800,
-            "refresh_token": refresh_token
-        }, status_code=200
-    )
+    return JSONResponse(session_token_data, status_code=200)
