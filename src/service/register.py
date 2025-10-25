@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 from datetime import datetime, timedelta, timezone
 import os
 import sys
-from fastapi.responses import JSONResponse
 import re
 sys.path.insert(1, os.getcwd())
 from src.models.register_data import RegisterData
@@ -60,7 +59,7 @@ def validate_password(password: str) -> JSONResponse | None:
             status_code=422,
         )
 
-def validate_email(email: str):
+def validate_email(email: str) -> JSONResponse | None:
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if not re.match(email_pattern, email):
         return JSONResponse(
@@ -72,7 +71,7 @@ def validate_email(email: str):
         )
 
 
-def validate_username(username: str):
+def validate_username(username: str) -> JSONResponse | None:
     if not 3 <= len(username) <= 30:
         return JSONResponse(
             {
@@ -94,9 +93,9 @@ def validate_username(username: str):
 
 async def register(data: RegisterData, request: Request):
     """
-    Logs the user in by validating the provided credentials and returning a JWT token upon successful authentication.
+    Registers a new user by validating the provided credentials and returning a JWT token upon successful registration.
     Args:
-        data: LoginData object containing username, email, and password.
+        data: RegisterData object containing username, email, and password.
         request: FastAPI Request object to access request headers.
     """
     ip_addr = request.headers.get("CF-Connecting-IP") or request.headers.get("X-Forwarded-For") or request.client.host
