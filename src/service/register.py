@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 from datetime import datetime, timedelta, timezone
 import os
 import sys
-from fastapi.responses import JSONResponse
 import re
 sys.path.insert(1, os.getcwd())
 from src.models.register_data import RegisterData
