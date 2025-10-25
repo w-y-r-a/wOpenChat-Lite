@@ -18,7 +18,6 @@ async def login(data: LoginData, request: Request) -> JSONResponse:
 
     email = data.email
     raw_password = data.password
-    hashed_password = hash_password(raw_password) # to compare with stored hashed password
     try:
         user = await users.find_one({"email": email})
     except KeyError:
