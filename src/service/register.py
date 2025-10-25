@@ -71,7 +71,7 @@ def validate_email(email: str) -> JSONResponse | None:
         )
 
 
-def validate_username(username: str):
+def validate_username(username: str) -> JSONResponse | None:
     if not 3 <= len(username) <= 30:
         return JSONResponse(
             {
