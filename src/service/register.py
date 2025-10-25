@@ -6,14 +6,14 @@ import sys
 from fastapi.responses import JSONResponse
 import re
 sys.path.insert(1, os.getcwd())
-from src.settingsmanager import async_read_config, ensure_config, async_write_config, read_config
+from src.settingsmanager import read_config
 from src.models.register_data import RegisterData
 from src.utils.create_user_json import create_user_json
 from src.utils.database import get_collection
 from src.utils.unencode_and_hash import hash_password
 from src.utils.jwt_token import create_jwt_token
 
-SECRET_KEY = read_config().get("secret_key")
+SECRET_KEY = read_config().get("secret_key") # Doesn't need to be ASYNC because it's startup
 
 def validate_password(password: str) -> JSONResponse | None:
     if len(password) < 8:
@@ -144,7 +144,7 @@ async def register(data: RegisterData, request: Request):
 
     await sessions.insert_one(
         {
-            "username": username,
+            "sub": username,
             "session_id": session_id,
             "ip_address": ip_addr,
             "refresh_token": refresh_token,
