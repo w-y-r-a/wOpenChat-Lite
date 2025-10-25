@@ -18,10 +18,8 @@ async def get_user_info(request: Request, data: UserInfo):
         decoded_token = decode_jwt_token(token)
     except ValueError as e:
         return JSONResponse(
-            {
-                "error": "JWTError",
-                "error_description": str(e)
-            }, status_code=500
+            {"error": "InvalidToken", "error_description": str(e)},
+            status_code=401
         )
 
     session = await sessions.find_one({"session_id": decoded_token["sid"]})

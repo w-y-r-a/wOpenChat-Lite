@@ -138,13 +138,13 @@ async def register(data: RegisterData, request: Request):
 
     session_id = os.urandom(16).hex()
     refresh_token = os.urandom(32).hex()
-    token_data = {"sub": username, "sid": session_id}
+    token_data = {"sub": sub, "sid": session_id}
 
     token = create_jwt_token(token_data, request.headers.get("host", ""), exp=30)
 
     await sessions.insert_one(
         {
-            "sub": username,
+            "sub": sub,
             "session_id": session_id,
             "ip_address": ip_addr,
             "refresh_token": refresh_token,

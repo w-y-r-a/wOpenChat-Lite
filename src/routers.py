@@ -29,7 +29,7 @@ router = APIRouter(tags=["app"])
 
 @router.get("/")
 async def root(request: Request, response: Response):
-    if setup_complete == True:
+    if setup_complete:
         return await root_handler.root_handler(request, response)
     else:
         return templates.TemplateResponse("setup.html", {
