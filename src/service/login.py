@@ -27,6 +27,14 @@ async def login(data: LoginData, request: Request) -> JSONResponse:
             }, status_code=404,
         )
 
+    # Second check for user existence
+    if user is None:
+        return JSONResponse(
+            {
+                "error": "UserNotFound"
+            }, status_code=404,
+        )
+
     if user.get("enabled") is False:
         return JSONResponse(
             {

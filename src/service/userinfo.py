@@ -71,13 +71,21 @@ async def get_user_info(request: Request, data: UserInfo):
             }, status_code=403
         )
 
+    created_at = user.get("created_at")
+    if isinstance(created_at, datetime):
+        if created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=timezone.utc)
+        created_at = created_at.isoformat()
+    else:
+        created_at = None
+
     user_info = {
         "sub": user.get("sub"),
         "username": user.get("username"),
         "email": user.get("email"),
         "picture": user.get("picture"),
         "admin": user.get("admin", False),
-        "created_at": user.get("created_at") if user.get("created_at") else None
+        "created_at": created_at
     }
 
     return JSONResponse(user_info, status_code=200)
