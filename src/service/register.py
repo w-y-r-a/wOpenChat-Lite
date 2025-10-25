@@ -59,7 +59,7 @@ def validate_password(password: str) -> JSONResponse | None:
             status_code=422,
         )
 
-def validate_email(email: str):
+def validate_email(email: str) -> JSONResponse | None:
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if not re.match(email_pattern, email):
         return JSONResponse(
