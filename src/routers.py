@@ -6,20 +6,12 @@ import os
 import sys
 sys.path.insert(1, os.getcwd())
 from service import root_handler
-from settingsmanager import read_config
+from utils.config import get_customization_config
 
-try:
-    THEME_COLOR = read_config().get("customization").get("theme_color") # pyright: ignore[reportOptionalMemberAccess]
-except (AttributeError, KeyError, TypeError):
-    THEME_COLOR = None
-try:
-    FAVICON_URL = read_config().get("customization").get("favicon_url") # pyright: ignore[reportOptionalMemberAccess]
-except (AttributeError, KeyError, TypeError):
-    FAVICON_URL = None
-try:
-    setup_complete = read_config().get("global").get("setup_complete") # pyright: ignore[reportOptionalMemberAccess]
-except (AttributeError, KeyError, TypeError):
-    setup_complete = False
+config = get_customization_config()
+THEME_COLOR = config["theme_color"]
+FAVICON_URL = config["favicon_url"]
+setup_complete = config["setup_complete"]
 
 templates = Jinja2Templates(
     directory=pathlib.Path(__file__).parent / "templates"

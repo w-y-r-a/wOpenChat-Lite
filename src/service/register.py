@@ -9,7 +9,7 @@ from src.models.register_data import RegisterData
 from src.utils.create_user_json import create_user_json
 from src.utils.database import get_collection
 from src.utils.unencode_and_hash import hash_password
-from src.utils.jwt_token import create_jwt_token
+from src.utils.session import create_session_and_token, get_client_ip
 
 
 
@@ -98,7 +98,7 @@ async def register(data: RegisterData, request: Request):
         data: RegisterData object containing username, email, and password.
         request: FastAPI Request object to access request headers.
     """
-    ip_addr = request.headers.get("CF-Connecting-IP") or request.headers.get("X-Forwarded-For") or request.client.host
+    ip_addr = get_client_ip(request)
     users = await get_collection("users")
     sessions = await get_collection("sessions")
 
@@ -135,30 +135,17 @@ async def register(data: RegisterData, request: Request):
     await users.insert_one(user_json)
     sub = user_json["sub"]
 
-    session_id = os.urandom(16).hex()
-    refresh_token = os.urandom(32).hex()
-    token_data = {"sub": sub, "sid": session_id}
-
-    token = create_jwt_token(token_data, request.headers.get("host", ""), exp=30)
-
-    await sessions.insert_one(
-        {
-            "sub": sub,
-            "session_id": session_id,
-            "ip_address": ip_addr,
-            "refresh_token": refresh_token,
-            "created_at": datetime.now(timezone.utc),
-            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
-        }
+    session_token_data = await create_session_and_token(
+        sub=sub,
+        ip_addr=ip_addr,
+        request=request,
+        sessions=sessions
     )
 
+    # Add success message to the response
+    session_token_data["message"] = "User registered successfully"
+
     return JSONResponse(
-        {
-            "access_token": token,
-            "token_type": "bearer",
-            "expires_in": 1800,
-            "refresh_token": refresh_token,
-            "message": "User registered successfully"
-        },
+        session_token_data,
         status_code=201,
     )
