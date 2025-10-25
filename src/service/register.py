@@ -94,9 +94,9 @@ def validate_username(username: str):
 
 async def register(data: RegisterData, request: Request):
     """
-    Logs the user in by validating the provided credentials and returning a JWT token upon successful authentication.
+    Registers a new user by validating the provided credentials and returning a JWT token upon successful registration.
     Args:
-        data: LoginData object containing username, email, and password.
+        data: RegisterData object containing username, email, and password.
         request: FastAPI Request object to access request headers.
     """
     ip_addr = request.headers.get("CF-Connecting-IP") or request.headers.get("X-Forwarded-For") or request.client.host
